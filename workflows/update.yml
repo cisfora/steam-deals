@@ -1,0 +1,39 @@
+name: อัปเดตดีล Steam
+
+on:
+  schedule:
+    - cron: "47 1 * * *"   # ทุกวัน 08:47 เวลาไทย (GitHub ใช้เวลา UTC)
+  workflow_dispatch:        # ปุ่ม "Run workflow" ไว้กดรันเองได้ทันที
+
+permissions:
+  contents: write
+
+concurrency:
+  group: steam-deals
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: ดึงราคาและส่งแจ้งเตือน
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python scripts/fetch_deals.py
+
+      - name: บันทึกข้อมูลใหม่ลง repo
+        run: |
+          git config user.name "deals-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/deals.json data/state.json
+          git diff --cached --quiet || git commit -m "อัปเดตดีล $(TZ=Asia/Bangkok date '+%Y-%m-%d %H:%M')"
+          git push
