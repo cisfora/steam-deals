@@ -1,0 +1,8 @@
+{
+  "country": "th",
+  "site_url": "",
+  "keep": { "min_review": 75, "min_reviews": 1000, "min_discount": 30 },
+  "alert": { "min_review": 90, "min_discount": 60, "min_reviews": 2000 },
+  "watch": [],
+  "notify_when_nothing_new": false
+}
